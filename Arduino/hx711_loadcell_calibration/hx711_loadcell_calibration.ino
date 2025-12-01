@@ -34,6 +34,8 @@ void setup() {
     float calibration_factor = reading / known_weight;
     Serial.print("CALIBRATION FACTOR: ");
     Serial.println(calibration_factor);
+
+    delay(5000)
   }
   else {
     Serial.println("HX711 MODULE NOT FOUND")
@@ -41,5 +43,12 @@ void setup() {
 }
 
 void loop() {
-  // Not necessary because calibration occurs once.
+  // Measure data and show on terminal screen (WILL NOT STORE DATA, USE PYTHON SCRIPT FOR THAT)
+  if (loadcell.is_ready()) {
+    unsigned long t = micros(); // TIMESTAMP IN MICROSECONDS
+    long rawData = loadcell.read()
+    Serial.print(t);
+    Serial.print(", ");
+    Serial.print(rawData)
+  }
 }
