@@ -7,7 +7,7 @@ const int LOADCELL_SCK_PIN = 3;
 HX711 loadcell;
 
 void setup() {
-  Serial.begin(57600)
+  Serial.begin(115200)
   loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN)
 
   if (loadcell.is_ready()) {
