@@ -48,7 +48,7 @@ void loop() {
     unsigned long t = micros(); // TIMESTAMP IN MICROSECONDS
     long rawData = loadcell.read()
     Serial.print(t);
-    Serial.print(", ");
+    Serial.print(",");
     Serial.print(rawData)
   }
 }
