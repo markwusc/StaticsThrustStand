@@ -6,9 +6,14 @@ const int LOADCELL_SCK_PIN = 3;
 
 HX711 loadcell;
 
+String readLine() {
+  while (!Serial.available()) {}      // wait for input
+  return Serial.readStringUntil('\n');
+}
+
 void setup() {
-  Serial.begin(115200)
-  loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN)
+  Serial.begin(115200);
+  loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
 
   if (loadcell.is_ready()) {
     // Set load cell scale to default
@@ -22,7 +27,7 @@ void setup() {
 
     // Measure a known weight
     Serial.println("PLACE KNOWN WEIGHT ON LOADCELL, MEASURING IN 30 SECONDS");
-    delay(30000);
+    delay(5000);
     long reading = loadcell.get_units(10);
     Serial.print("RESULT (ADC): ");
     Serial.println(reading);
@@ -35,10 +40,10 @@ void setup() {
     Serial.print("CALIBRATION FACTOR: ");
     Serial.println(calibration_factor);
 
-    delay(5000)
+    delay(5000);
   }
   else {
-    Serial.println("HX711 MODULE NOT FOUND")
+    Serial.println("HX711 MODULE NOT FOUND");
   }
 }
 
@@ -46,9 +51,10 @@ void loop() {
   // Measure data and show on terminal screen (WILL NOT STORE DATA, USE PYTHON SCRIPT FOR THAT)
   if (loadcell.is_ready()) {
     unsigned long t = micros(); // TIMESTAMP IN MICROSECONDS
-    long rawData = loadcell.read()
+    long rawData = loadcell.read();
     Serial.print(t);
     Serial.print(",");
-    Serial.print(rawData)
+    Serial.println(rawData);
+    
   }
 }
