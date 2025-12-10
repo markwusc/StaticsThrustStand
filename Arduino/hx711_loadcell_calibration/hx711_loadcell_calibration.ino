@@ -1,60 +1,60 @@
-#include "HX711.h"
+#include <HX711.h>
+#include <EEPROM.h>
 
-// Define board pins
-const int LOADCELL_DOUT_PIN = 2;
-const int LOADCELL_SCK_PIN = 3;
+const int LOADCELL_DOUT = 2;
+const int LOADCELL_SCK  = 3;
 
-HX711 loadcell;
-
-String readLine() {
-  while (!Serial.available()) {}      // wait for input
-  return Serial.readStringUntil('\n');
-}
+HX711 scale;
 
 void setup() {
   Serial.begin(115200);
-  loadcell.begin(LOADCELL_DOUT_PIN, LOADCELL_SCK_PIN);
+  scale.begin(LOADCELL_DOUT, LOADCELL_SCK);
 
-  if (loadcell.is_ready()) {
-    // Set load cell scale to default
-    loadcell.set_scale();
-
-    // Zero the load cell in preparation for calibration
-    Serial.println("ZEROING, ENSURE LOADCELL IS NOT LOADED");
-    delay(5000);
-    loadcell.tare();
-    Serial.println("SUCCESSFULLY ZEROED");
-
-    // Measure a known weight
-    Serial.println("PLACE KNOWN WEIGHT ON LOADCELL, MEASURING IN 30 SECONDS");
-    delay(5000);
-    long reading = loadcell.get_units(10);
-    Serial.print("RESULT (ADC): ");
-    Serial.println(reading);
-    Serial.println("Enter the known weight in GRAMS, then press ENTER:");
-    float known_weight = readLine().toFloat();
-
-    // Calculate, save, and print the calibration factor
-    Serial.println("CALCULATING CALIBRATION FACTOR...");
-    float calibration_factor = reading / known_weight;
-    Serial.print("CALIBRATION FACTOR: ");
-    Serial.println(calibration_factor);
-
-    delay(5000);
+  while (!scale.is_ready()) {
+    Serial.println("HX711 not ready...");
+    delay(500);
   }
-  else {
-    Serial.println("HX711 MODULE NOT FOUND");
+
+  Serial.println("=== LOAD CELL CALIBRATION ===");
+  Serial.println("Remove all weight. Zeroing in 5 seconds...");
+  delay(5000);
+
+  scale.tare(50);
+  Serial.println("Zero complete.");
+
+  Serial.println("Place known weight on scale. Measuring for 5 seconds...");
+  delay(2000);
+
+  long sum = 0;
+  int samples = 0;
+  unsigned long start = millis();
+
+  while (millis() - start < 5000) {
+    if (scale.is_ready()) {
+      sum += scale.read();
+      samples++;
+    }
   }
+
+  long avg_raw = sum / samples;
+  Serial.print("Average raw: ");
+  Serial.println(avg_raw);
+
+  Serial.println("Enter weight in grams, then press ENTER:");
+  while (!Serial.available());
+
+  float known_grams = Serial.readStringUntil('\n').toFloat();
+
+  float cal_factor = avg_raw / known_grams;
+
+  Serial.print("Calibration factor = ");
+  Serial.println(cal_factor, 6);
+
+  // Save to EEPROM
+  EEPROM.put(0, cal_factor);
+  Serial.println("Saved to EEPROM at address 0.");
 }
 
 void loop() {
-  // Measure data and show on terminal screen (WILL NOT STORE DATA, USE PYTHON SCRIPT FOR THAT)
-  if (loadcell.is_ready()) {
-    unsigned long t = micros(); // TIMESTAMP IN MICROSECONDS
-    long rawData = loadcell.read();
-    Serial.print(t);
-    Serial.print(",");
-    Serial.println(rawData);
-    
-  }
+  // nothing
 }
