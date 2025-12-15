@@ -7,11 +7,12 @@ import sys
 import termios
 import tty
 
-PORT = "/dev/tty.usbmodem1401"
+PORT = "/dev/tty.usbmodem1301"
 BAUD = 115200
 CSV_FILE = "/Users/gusfisher/Desktop/loadCellData.csv"
 WINDOW_SEC = 10
 
+# Open the serial port, if no new data for 1 second throw error
 ser = serial.Serial(PORT, BAUD, timeout=1)
 
 csvfile = open(CSV_FILE, "w", newline="")
